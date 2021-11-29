@@ -1,0 +1,22 @@
+<html>
+	<head>
+		<title>MineBug FileSharing</title>
+		<link rel="stylesheet" type="text/css" href="styles/upload" media="screen" />
+	</head>
+	<body>
+		<div style="background-color: #3F3F3F; height: 5px; padding: 50px; margin: -10px"></div>
+		<div style="background-color: #3F3F3F; position: absolute; top: 100px; left: 0px; width: 200px; height: 70px"></div>
+		<div style="background-color: #3F3F3F; position: absolute; top: 49px; left: 150px; width: 100px; height: 100px; transform: rotate(45deg)"></div>
+		<div class="logo"></div>
+		<div class="centered-wrapper" style="text-align:center">
+			<form method='post' id="form" action='' enctype='multipart/form-data'>
+				<label class="btn-select-file" for="fileUpload"></label>
+				<input class="hidden" type='file' id="fileUpload" multiple='' required='' name='files' onchange="javascript:document.getElementById('form').submit();"></input>
+			</form>
+		</div>
+		
+		
+		
+		<div style="background-color: #3F3F3F; bottom: 0px; height: 500px; margin: -10px"></div>
+	</body>
+</html>

@@ -1,0 +1,7 @@
+/data/
+/logs/
+/.project
+/.classpath
+/filesharing.properties
+/.settings/org.eclipse.jdt.core.prefs
+/bin/
