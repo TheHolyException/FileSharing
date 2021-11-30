@@ -1,0 +1,21 @@
+<html>
+	<body>
+		<canvas class="background"></canvas>
+		<link rel="stylesheet" type="text/css" href="styles/404" media="screen" />
+		<script src="scripts/background"></script>
+		<script type="text/javascript">
+			window.onload = function() {
+			  Particles.init({
+			    selector: '.background',
+			    maxParticles: 100,
+			    sizeVariations: 2,
+			    speed: 0.5,
+// 			    color: ["#FF0000", "#00FF00", "#0000FF"],
+ 			    color: "#FFFFFF",
+ 			   	minDistance: 200,
+			    connectParticles: true,
+			  });
+			};
+		</script>
+	</body>
+</html>

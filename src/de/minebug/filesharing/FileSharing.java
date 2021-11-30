@@ -1,22 +1,18 @@
 package de.minebug.filesharing;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.minebug.filesharing.web.HTTPserver;
-import de.theholyexception.holyapi.datastorage.dataconnection.DataBaseInterface;
 import de.theholyexception.holyapi.datastorage.dataconnection.interfaces.MySQLInterface;
 import de.theholyexception.holyapi.util.LoggingManager;
-import de.theholyexception.holyapi.util.SortedProperties;
 import me.kaigermany.utilitys.logging.ConsoleLogInjector;
 import me.kaigermany.utilitys.logging.ConsoleType;
 
@@ -27,7 +23,7 @@ public class FileSharing {
 	private static Logger logger;
 	private static Properties config;
 	private static LoggingManager loggingManager;
-	private static FileManager fileManager;
+	private static FileInterface fileManager;
 
 	public static void main(String[] args) {
 
@@ -55,7 +51,6 @@ public class FileSharing {
 		
 		//endregion
 
-//		MySQLInterface sql = new MySQLInterface("minebug.de", 3306, "filesharing", "x3kiGESuyA5aGodeF1R1Gaq1YeGITe", "filesharing");
 		MySQLInterface sql = new MySQLInterface(
 				config.getProperty("sql.host"), 
 				Integer.parseInt(config.getProperty("sql.port")), 
@@ -72,6 +67,8 @@ public class FileSharing {
 				+ "CREATE TABLE IF NOT EXISTS `files` ("
 				+ "`szKey` VARCHAR(8) NOT NULL,"
 				+ "`szFilename` VARCHAR(256) NOT NULL,"
+				+ "`szContentType` VARCHAR(200) NOT NULL,"
+				+ "`nContentLength` INT(11) NOT NULL,"
 				+ "`tCreated` datetime DEFAULT current_timestamp(),"
 				+ "`tValid` datetime DEFAULT '9999-12-31 23:59:59',"
 				+ "PRIMARY KEY (`szKey`)"
@@ -79,22 +76,14 @@ public class FileSharing {
 				+ ""
 				);
 		
-		fileManager = new FileManager(sql, new File(".\\data\\"));
+		String storageMode = config.getProperty("datastorage.mode");
+		if (storageMode.equalsIgnoreCase("multi")) {
+			fileManager = new FileManagerMulti(sql, new File(config.getProperty("datastorage.multi.location")));
+		} else if (storageMode.equalsIgnoreCase("single")) {
+			fileManager = new FileManagerSingle(sql, new File(config.getProperty("datastorage.single.location")));
+		} else throw new IllegalStateException("Invalid storagemode: " + storageMode);
 		
 		new HTTPserver(80);
-		
-		
-//		File f = new File(".\\data\\test.xml");
-//		try {
-//			f.createNewFile();
-//		} catch (IOException ex) {
-//			ex.printStackTrace();
-//		}
-//		
-////		fileManager.addFile(f);
-//		fileManager.getFile(file -> {
-//			System.out.println(file.getAbsolutePath());
-//		}, "52b99ca");
 	}
 	
 	private static void createNewConfigFile(File configFile) throws IOException {
@@ -114,8 +103,12 @@ public class FileSharing {
 		}
 	}
 	
-	public static FileManager getFileManager() {
+	public static FileInterface getFileManager() {
 		return fileManager;
+	}
+	
+	public static Logger getLogger() {
+		return logger;
 	}
 	
 }
