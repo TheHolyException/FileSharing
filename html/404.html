@@ -1,21 +1,30 @@
 <html>
-	<body>
-		<canvas class="background"></canvas>
+	<head>
 		<link rel="stylesheet" type="text/css" href="styles/404" media="screen" />
+		<link rel="stylesheet" type="text/css" href="styles/defaultStyles" media="screen"/>
 		<script src="scripts/background"></script>
 		<script type="text/javascript">
 			window.onload = function() {
 			  Particles.init({
 			    selector: '.background',
-			    maxParticles: 100,
+			    maxParticles: 50,
 			    sizeVariations: 2,
-			    speed: 0.5,
+			    speed: 1,
 // 			    color: ["#FF0000", "#00FF00", "#0000FF"],
- 			    color: "#FFFFFF",
+ 			    color: ["#ff201c", "#ff603c"],
  			   	minDistance: 200,
 			    connectParticles: true,
 			  });
 			};
 		</script>
+	</head>
+	<body>
+		<canvas class="background"></canvas>
+		<div class="uiElement1"></div>
+		<div class="uiElement2"></div>
+		<div class="uiElement3"></div>
+		<div class="logo"><a href="$host$" class="fill-div"></a></div>
+		<div class="logoText">Minebug File Transfer</div>
+		<div class="errorMessage">File not Found</div>
 	</body>
 </html>

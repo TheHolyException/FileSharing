@@ -36,7 +36,7 @@ public class Connection implements Runnable {
 			//[0] == GET | POST
 			//[1] == destination
 			//[2] == HTTP-verstion
-			System.out.println(Arrays.deepToString(http_destination));
+//			System.out.println(Arrays.deepToString(http_destination));
 			boolean isPost = http_destination[0].equalsIgnoreCase("POST");
 			if(http_destination[0].equalsIgnoreCase("GET") || isPost){
 				String[] a = http_destination[1].indexOf('?') == -1 ? new String[]{http_destination[1], null} : http_destination[1].split("\\?");

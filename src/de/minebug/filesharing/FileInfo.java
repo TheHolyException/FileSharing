@@ -1,17 +1,21 @@
 package de.minebug.filesharing;
 
+import java.sql.Timestamp;
+
 public class FileInfo {
 
 	private String filename;
 	private long size;
 	private String name;
 	private String contentType;
+	private Timestamp available;
 	
-	public FileInfo(String filename, long size, String name, String contentType) {
+	public FileInfo(String filename, long size, String name, String contentType, Timestamp available) {
 		this.filename = filename;
 		this.size = size;
 		this.name = name;
 		this.contentType = contentType;
+		this.available = available;
 	}
 	
 	public String getFileName() {
@@ -28,6 +32,10 @@ public class FileInfo {
 	
 	public String getContentType() {
 		return contentType;
+	}
+	
+	public Timestamp getAvailable() {
+		return available;
 	}
 	
 	@Override

@@ -61,8 +61,13 @@ public class FileManagerMulti implements FileInterface {
 					+ "SELECT szKey, szContentType, szFilename, tValid FROM files "
 					+ "WHERE tValid > CURRENT_TIMESTAMP() AND szKey=?;", key);
 			File file = new File(baseDir, key);
-			if (!file.exists() || !result.first()) return null;
-			return new FileInfo(key, file.length(), result.getString("szFilename"), result.getString("szContentType"));	
+			if (!file.exists() || !result.next()) return null;
+			return new FileInfo(
+					key, 
+					file.length(), 
+					result.getString("szFilename"), 
+					result.getString("szContentType"), 
+					result.getTimestamp("tValid"));	
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 		}
@@ -84,14 +89,17 @@ public class FileManagerMulti implements FileInterface {
 		}
 	}
 	
-	public String addFile(BufferedInputStream is, String filename, byte[] token, String contentType, Timestamp timestamp, long contentLength) throws IOException {
-		if (is == null || filename == null || token == null || contentType == null || filename.length() == 0 || token.length == 0)
-			throw new IllegalStateException("Invalid Arguments is: " + is + " filename: " + filename + " token: " + token + " contentType: " + contentType);
+	public String addFile(BufferedInputStream is, String filename, String contentType, Timestamp timestamp, long contentLength) throws IOException {
+		System.out.println("filename: " + filename + "; ContentType: " + contentType);
+		if (is == null || filename == null || filename.length() == 0)
+			throw new IllegalStateException("Invalid Arguments is: " + is + " filename: " + filename + " contentType: " + contentType);
 		
+		if (contentType == null) contentType = "";
 		String key = UUID.randomUUID().toString().substring(0, 8);
 		
 		File file = new File(baseDir, key);
 		FileOutputStream fos = new FileOutputStream(file);
+		System.out.println(file.getAbsolutePath());
 
 		long maxExcpectedLen = contentLength;
 		long offset = 0;
@@ -122,7 +130,7 @@ public class FileManagerMulti implements FileInterface {
 	public void update() throws IOException {
 		dataBaseInterface.executeQueryAsync(result -> {
 			try {
-				while (result.next()) {
+				while (result != null && result.next()) {
 					try {
 						String key = result.getString("szKey");
 						Files.delete(new File(baseDir, key).toPath());
@@ -175,7 +183,7 @@ public class FileManagerMulti implements FileInterface {
 		try {
 			for (File filename : baseDir.listFiles()) {
 				ResultSet rs = dataBaseInterface.executeQuerySafe("SELECT * FROM files WHERE `szKey`=?", filename.getName());
-				if (!rs.first()) {
+				if (!rs.next()) {
 					invalid.add(filename.getName());
 					continue;
 				}

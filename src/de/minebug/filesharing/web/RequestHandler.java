@@ -3,12 +3,19 @@ package de.minebug.filesharing.web;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.imageio.ImageIO;
@@ -23,13 +30,22 @@ import de.minebug.filesharing.FileSharing;
 
 public class RequestHandler {
 
+	private static Random random = new Random();
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+	private static boolean debugEnabled = Boolean.parseBoolean(FileSharing.getConfig().getProperty("debug"));
+	private static String hostname = FileSharing.getConfig().get("host").toString();
+	
 	public static void onGET(BufferedOutputStream os, String string, HashMap<String, String> uRL_args,
 			HashMap<String, String> HTTP_body) throws IOException {
 
+		if (debugEnabled)
+			System.out.println(HTTP_body);
+		
 		String[] args = string.split("/");
 		
 		if (args.length == 0) {
-			writeFile("html/upload.html", "text/html", os);
+			writeFile("html/upload.html", "text/html", os,
+					"$host$", hostname);
 		}
 		
 		if (args.length == 2) {
@@ -39,10 +55,11 @@ public class RequestHandler {
 			else {
 				FileInfo info = FileSharing.getFileManager().getFileInfo(args[1]);
 				if (info == null) {
-					writeFile("html/404.html", "text/html", os);
+					writeFile("html/404.html", "text/html", os,
+							"$host$", hostname);
 				} else {
 					try {
-						String downloadAddress = "localhost/download/" + info.getFileName() + "/" + info.getName();
+						String downloadAddress = hostname+"/download/" + info.getFileName() + "/" + info.getName();
 						
 						BufferedImage image = generateQRCodeImage(downloadAddress);
 						ByteArrayOutputStream ios = new ByteArrayOutputStream();
@@ -54,7 +71,11 @@ public class RequestHandler {
 						writeFile("html/download.html", "text/html", os, 
 								"$key$", info.getFileName(),
 								"$qrcode$", ("<img class=\"qrCode\" alt=\"\" src=\"data:image/png;base64, " + new String(encoded) + "\" />"),
-								"$name$", info.getName());
+								"$name$", info.getName(),
+								"$host$", hostname,
+								"$size$", readableFileSize(info.getSize()),
+								"$valid$", dateFormat.format(new Date(info.getAvailable().getTime()))
+								);
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
@@ -67,11 +88,14 @@ public class RequestHandler {
 			}
 
 			else if (args[1].equalsIgnoreCase("styles")) {
-				writeFile("html/"+args[2]+".css", "text/css", os);
+				writeFile("html/"+args[2]+".css", "text/css", os,
+						"$rnd$", ""+(random.nextInt(4)+1),
+						"$host$", hostname);
 			}
 
 			else if (args[1].equalsIgnoreCase("scripts")) {
-				writeFile("html/"+args[2]+".js", "text/javascript", os);
+				writeFile("html/"+args[2]+".js", "text/javascript", os,
+						"$host$", FileSharing.getConfig().get("host").toString());
 			}
 			
 			
@@ -81,9 +105,11 @@ public class RequestHandler {
 				
 				FileInfo info;
 				if ((info = FileSharing.getFileManager().getFileInfo(key)) == null)
-					writeFile("html/404.html", "text/html", os);
+					writeFile("html/404.html", "text/html", os,
+							"$host$", hostname);
 				else {
-					writeHeader("application/octet-stream", info.getSize(), os);
+//					writeHeader("application/octet-stream", info.getSize(), os);
+					writeDownloadHeader(info.getName(), info.getSize(), os);
 					FileSharing.getFileManager().getFile(key, os);
 				}
 			}
@@ -95,16 +121,41 @@ public class RequestHandler {
 			HashMap<String, String> hTTP_body, HashMap<String, String> pOST_args) throws IOException {
 		
 	}
+	
+	private static HashMap<String, String> readHTTP_body(InputStream is, AtomicLong expectedDataLen) throws IOException {
+		//DataInputStream dis = new DataInputStream(is);
+		HashMap<String, String> out = new HashMap<String, String>();
+		String row;
+		while((row = readLine(is, expectedDataLen)) != null && row.length() > 2) {
+			String[] subArgs = Connection._split(row, ":");
+			out.put(subArgs[0].toLowerCase(), subArgs[1].trim());
+		}
+		return out;
+	}
+	
+	private static String readLine(InputStream is, AtomicLong expectedDataLen) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(64);
+		int chr;
+		while((chr = is.read()) != '\n') baos.write(chr);
+		expectedDataLen.addAndGet(-(baos.size() + 1));
+		return new String(baos.toByteArray()).trim().replace("\r", "");
+	}
 
 	public static void onPOST_multipart(BufferedOutputStream os, String string, HashMap<String, String> URL_args, HashMap<String, String> HTTP_body, BufferedInputStream is) throws IOException {
-		System.out.println(HTTP_body);
+		
+		if (debugEnabled) 
+			System.out.println(HTTP_body);
 		String token = HTTP_body.get("content-type").split("boundary\\=")[1].split(";")[0];
 //		System.out.println("token = " + token);
 		AtomicLong expectedDataLen = new AtomicLong(Long.parseLong(HTTP_body.get("content-length")));
-
-
+		
+		
 		String token2 = new String(readUntil(is, "\r\n".getBytes(), expectedDataLen));
-		System.out.println("token3:" + token2);
+//		System.out.println("token3:" + token2);
+		
+		HashMap<String, String> postBody = readHTTP_body(is, expectedDataLen);
+/*
+		
 		
 		readUntil(is, " filename=\"".getBytes(), expectedDataLen);
 		String filename = new String(readUntil(is, "\"".getBytes(), expectedDataLen));
@@ -114,16 +165,25 @@ public class RequestHandler {
 		
 		readUntil(is, "\n".getBytes(), expectedDataLen);
 		System.out.println(expectedDataLen.get());
+		*/
+		System.out.println("postBody : " + postBody);
+		//{content-disposition=form-data; name="files"; filename="test_file (1).txt",
+		// content-type=text/plain}
+		ByteArrayInputStream is2 = new ByteArrayInputStream(postBody.get("content-disposition").getBytes());
+		AtomicLong dummy = new AtomicLong();
+		readUntil(is2, " filename=\"".getBytes(), dummy);
+		String filename = new String(readUntil(is2, "\"".getBytes(), dummy));
+		//is2 = new ByteArrayInputStream(postBody.get("Content-Type").getBytes());
+		//readUntil(is, "Content-Type: ".getBytes(), expectedDataLen);
+		String contentType = postBody.get("content-type");//new String(readUntil(is, "\n".getBytes(), expectedDataLen));
+
+		filename = filename.replace("$", "_");
 		
-		
-		expectedDataLen.getAndAdd(-(token.length() + 8));
-		
-		System.out.println("writing");
+		expectedDataLen.getAndAdd(-(2 + 2 + token.length() + 2 + 2));
 		
 		String key = FileSharing.getFileManager().addFile(
 				is,
 				filename,
-				("\r\n"+token2).getBytes(),
 				contentType,
 				new Timestamp(System.currentTimeMillis()+(1000*60*60*24)),
 				expectedDataLen.get());
@@ -136,6 +196,8 @@ public class RequestHandler {
 		writeFile("html/redirect.html", "text/html", os,
 				"$key$", key);
 		
+		try { Thread.sleep(200); } catch (Exception ex) { ex.printStackTrace(); }
+		
 		os.flush();
 		os.close();
 	}
@@ -143,7 +205,7 @@ public class RequestHandler {
 	
 	
 	
-	private static byte[] readUntil(BufferedInputStream is, byte[] word, AtomicLong l) throws IOException {
+	private static byte[] readUntil(InputStream is, byte[] word, AtomicLong l) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		int c;
 		int pointer = 0;
@@ -169,18 +231,13 @@ public class RequestHandler {
 		return baos.toByteArray();
 	}
 	
-
-	private static void writeDefaultTemplate_403(OutputStream os) throws IOException {
-		os.write(("HTTP/1.1 403 Forbidden\r\nContent-Type: text/html\r\nConnection: Close\r\n\r\nYou are not allowed to view this Ressource.").getBytes());
-	}
-	private static void writeDefaultTemplate_404(OutputStream os) throws IOException {
-		os.write(("HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nConnection: Close\r\n\r\nThe Server can't find the requested Ressource.").getBytes());
-	}
-	private static void writeDefaultTemplate_429(OutputStream os) throws IOException {
-		os.write(("HTTP/1.1 429 Too Many Requests\r\nContent-Type: text/html\r\nConnection: Close\r\n\r\nThe Server does not allow that many requests.").getBytes());
-	}
-	private static void writeDefaultTemplate_501(OutputStream os) throws IOException {
-		os.write(("HTTP/1.1 501 Not Implemented\r\nContent-Type: text/html\r\nConnection: Close\r\n\r\nThe Server does not support the requested API method.").getBytes());
+	private static void writeDownloadHeader(String fileName, long l, OutputStream os) throws IOException {
+		os.write((""
+				+ "HTTP/1.1 200 OK\r\n"
+				+ "Content-Type: application/octet-stream\r\n"
+				+ "Content-Disposition: attachment; filename=" + fileName + "\r\n"
+				+ "Content-Length: "+l+"\r\n"
+				+ "\r\n").getBytes());
 	}
 	
 	private static void writeHeader(String contentType, long l, OutputStream os) throws IOException {
@@ -219,6 +276,13 @@ public class RequestHandler {
 	      barcodeWriter.encode(barcodeText, BarcodeFormat.QR_CODE, 200, 200);
 	    
 	    return MatrixToImageWriter.toBufferedImage(bitMatrix);
+	}
+	
+	public static String readableFileSize(long size) {	
+	    if(size <= 0) return "0";
+	    final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
+	    int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
+	    return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
 	}
 	
 }

@@ -1,17 +1,23 @@
 <html>
 	<head>
 		<title>MineBug FileSharing</title>
-		<link rel="stylesheet" type="text/css" href="styles/upload" media="screen" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="styles/upload" media="screen"/>
+		<link rel="stylesheet" type="text/css" href="styles/defaultStyles" media="screen"/>
 		<script src="scripts/background"></script>
 		<script type="text/javascript">
 			window.onload = function() {
+			  document.getElementById("fileUpload").addEventListener("click", () =>{
+			  	document.getElementById("fileUploadField").click();
+			  });
+			  
 			  Particles.init({
 			    selector: '.background',
-			    maxParticles: 150,
-			    sizeVariations: 2,
+			    maxParticles: 50,
+			    sizeVariations: 5,
 			    speed: 1,
-// 			    color: ["#FF0000", "#00FF00", "#0000FF"],
- 			    color: "#ff603c",
+ 			    color: ["#ff201c", "#ff603c"],
+ 			    //color: "#ff201c",
  			   	minDistance: 200,
 			    connectParticles: true,
 			  });
@@ -20,18 +26,16 @@
 	</head>
 	<body>
 		<canvas class="background"></canvas>
-		<div style="background-color: #3F3F3F; z-index: 99; position: absolute; width: 100%; height: 5px; padding: 50px; margin: 0px"></div>
-		<div style="background-color: #3F3F3F; z-index: 99; position: absolute; top: 90px; left: 0px; width: 200px; height: 70px"></div>
-		<div style="background-color: #3F3F3F; z-index: 99; position: absolute; top: 39px; left: 150px; width: 100px; height: 100px; transform: rotate(45deg)"></div>
-		<div class="logo"></div>
-		<div class="LogoText">
-			Minebug File Transfer
-		</div>
-		<div class="centered-wrapper" style="text-align:center">
+		<div class="uiElement1"></div>
+		<div class="uiElement2"></div>
+		<div class="uiElement3"></div>
+		<div class="logo"><a href="$host$" class="fill-div"></a></div>
+		<div class="LogoText">Minebug File Transfer</div>
+		<div class="divUpload">
 			<form method='post' id="form" action='' enctype='multipart/form-data'>
-				<label class="btn-select-file" for="fileUpload"></label>
-				<input class="hidden" type='file' id="fileUpload" multiple='' required='' name='files' onchange="javascript:document.getElementById('form').submit();"></input>
+				<input class="fileUploadField" type='file' id="fileUploadField" multiple='' required='' name='files' onchange="javascript:document.getElementById('form').submit();"></input>
 			</form>
+			<button class="btnUpload" id="fileUpload"><i class="fa fa-upload"></i> Upload</button>
 		</div>
 	</body>
 </html>

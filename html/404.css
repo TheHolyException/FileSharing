@@ -1,14 +1,8 @@
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background-image: url(../images/background_1.jpg);
-}
-
-.background {
-  position: absolute;
-  display: block;
-  top: 0;
-  left: 0;
-  z-index: 0;
+.errorMessage {
+	position: absolute;
+	top: 20%;
+	left: 10%;
+	color: #ff603c;
+	font: italic small-caps bold 30px/30px Georgia, serif;
+	z-index: 99;
 }

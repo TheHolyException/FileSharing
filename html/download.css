@@ -1,103 +1,46 @@
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background-image: url(../images/background_1.jpg);
-}
-
-.background {
-  position: absolute;
-  display: block;
-  top: 0;
-  left: 0;
-  z-index: 10;
-}
-
-.centered-wrapper {
-	position: relative;
-	text-align: center;
-}
-
-.centered-wrapper:before {
-	content: "";
-	position: relative;
-	display: inline-block;
-	width: 0;
-	height: 80%;
-	vertical-align: middle;
-}
-
-.centered-content {
-	display: inline-block;
-	vertical-align: middle;
-}
-
-.logo {
-	position: absolute;
-	top: 10px;
-	left: 40px;
-	background-image: url(../images/logo.png);
-	background-position: 0px 0px;
-	background-size: 150px;
-	width: 150px;
-	height: 150px;
-}
-
-.logo {
-	position: absolute;
-	top: 10px;
-	left: 40px;
-	background-image: url(../images/logo.png);
-	background-position: 0px 0px;
-	background-size: 150px;
-	width: 150px;
-	height: 150px;
-	z-index: 99;
-}
-
-.LogoText {
-	position: absolute;
-	top: 17px;
-	left: 300px;
-	color: #ff603c;
-	font: italic small-caps bold 60px/60px Georgia, serif;
-	z-index: 99;
-}
-
-.downloadButton {
+.divDownload {
 	position: absolute;
 	z-index: 99;
-	left: 40%;
-	top: 60%;
+	left: 45%;
+	top: 30%;
+	width: 200px;
+}
+
+.btnDownload {
 	width: 200px;
 	height: 50px;
-	border-radius: 5%;
-	border: 1px solid #1B1B1B;
-	background-color: #D5D8D8;
+	background-color: #1e90ff;
+	border: none;
+	color: #FFFFFF;
+	padding: 12px 30px;
+	cursor: pointer;
+	font-size: 20px;
+	border-radius: 2%;
 }
 
-.downloadButton:hover {
-	background-color: #BBBBBB;
+/* Darker background on mouse-over */
+.btnDownload:hover {
+	background-color: #4169e1;
 }
 
-.downloadButton:active {
-	background-color: #7F7B7B;
+.divFileInfo {
+	width: 200px;
+	height: 85px;
+	color: #FFFFFF;
+	background-color: #1e90ff;
+}
+
+.divFileInfoContex {
+	margin-left: 10px;
+	width: 180px;
+	height: 70px;
+	z-index: 100;
+	font: bold 15px/15px Arial, sans-serif;
 }
 
 .qrCode {
-	position: absolute;
-	left: 40%;
-	top: 20%;
+	left: 0%;
+	top: 40%;
+	width: 200px;
 	z-index: 99;
-}
-
-a.fill-div {
-    display: block;
-    height: 100%;
-    width: 100%;
-    text-decoration: none;
-}
-
-.hidden {
-	opacity: 0;
 }

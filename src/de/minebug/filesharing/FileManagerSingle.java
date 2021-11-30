@@ -57,7 +57,12 @@ public class FileManagerSingle implements FileInterface {
 					+ "SELECT szKey, szContentType, szFilename, tValid FROM files "
 					+ "WHERE tValid > CURRENT_TIMESTAMP() AND szKey=?;", key);
 			result.first();
-			return new FileInfo(key, mft.getFileSize(key), result.getString("szFilename"), result.getString("szContentType"));	
+			return new FileInfo(
+					key,
+					mft.getFileSize(key),
+					result.getString("szFilename"),
+					result.getString("szContentType"), 
+					result.getTimestamp("tValid"));	
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 		}

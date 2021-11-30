@@ -1,49 +1,54 @@
 <html>
 	<head>
 		<title>MineBug FileSharing</title>
-		<link rel="stylesheet" type="text/css" href="styles/download" media="screen" /><script src="scripts/background">
-		</script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="styles/download" media="screen"/>
+		<link rel="stylesheet" type="text/css" href="styles/defaultStyles" media="screen"/>
+		<script src="scripts/background"></script>
 		<script type="text/javascript">
 			window.onload = function() {
 			  Particles.init({
 			    selector: '.background',
-			    maxParticles: 150,
+			    maxParticles: 50,
 			    sizeVariations: 2,
 			    speed: 1,
 // 			    color: ["#FF0000", "#00FF00", "#0000FF"],
- 			    color: "#ff603c",
+ 			    color: ["#ff201c", "#ff603c"],
  			   	minDistance: 200,
 			    connectParticles: true,
 			  });
 			};
 			
-
 			function download() {
-				var host = window.location.host;
-				window.location.href="http://"+host+"/download/$key$/$name$";
+				/* window.location.href="$host$/download/$key$/$name$"; */
+				window.open("$host$/download/$key$/$name$", "_self", "toolbar=yes", "menubar=yes");
 			};
 		</script>
 	</head>
 	<body>
 		<canvas class="background"></canvas>
-		<div style="background-color: #3F3F3F; z-index: 99; position: absolute; width: 100%; height: 5px; padding: 50px; margin: 0px"></div>
-		<div style="background-color: #3F3F3F; z-index: 99; position: absolute; top: 90px; left: 0px; width: 200px; height: 70px"></div>
-		<div style="background-color: #3F3F3F; z-index: 99; position: absolute; top: 39px; left: 150px; width: 100px; height: 100px; transform: rotate(45deg)"></div>
-		<div class="logo">
-			<a href="http://localhost" class="fill-div"></a>
-		</div>
-		<div class="LogoText">
-			Minebug File Transfer
-		</div>
-		<div class="centered-wrapper" style="text-align:center">
-			<button class="downloadButton" type="button" onclick="download();">Download</button>
-		</div>
-		<label id="test">asdf</label>
-		
+		<div class="uiElement1"></div>
+		<div class="uiElement2"></div>
+		<div class="uiElement3"></div>
+		<div class="logo"><a href="$host$" class="fill-div"></a></div>
+		<div class="logoText">Minebug File Transfer</div>
 	
-		$qrcode$
+		<div class="divDownload">
+			<div class="divFileInfo">
+				<div class="divFileInfoContex">
+					<br>
+					$name$
+					<br>
+					Size: $size$
+					<br>
+					Available until:
+					<br>
+					$valid$
+				</div>
+			</div>
+			$qrcode$
+			<button class="btnDownload" onclick="download();"><i class="fa fa-download"></i> Download</button>
+		</div>
 		
-		<script type="text/javascript">
-		</script>
 	</body>
 </html>

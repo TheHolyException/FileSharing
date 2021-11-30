@@ -40,6 +40,7 @@ public class HTTPSserver implements Runnable {
 		System.setProperty("javax.net.ssl.keyStore", ks.getAbsolutePath());
 	    System.setProperty("javax.net.ssl.keyStorePassword", keyStore_password);
 	    System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
+	    System.setProperty("https.protocols", "TLSv1.2");
 		try{
 			SSLServerSocketFactory socketFactory = SSLContext.getDefault().getServerSocketFactory();
 		    ss = socketFactory.createServerSocket(port);

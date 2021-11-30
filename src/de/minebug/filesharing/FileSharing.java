@@ -10,6 +10,9 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.sqlite.SQLiteConfig;
+
+import de.minebug.filesharing.web.HTTPSserver;
 import de.minebug.filesharing.web.HTTPserver;
 import de.theholyexception.holyapi.datastorage.dataconnection.interfaces.MySQLInterface;
 import de.theholyexception.holyapi.util.LoggingManager;
@@ -24,6 +27,7 @@ public class FileSharing {
 	private static Properties config;
 	private static LoggingManager loggingManager;
 	private static FileInterface fileManager;
+	private static SQLiteConfig c;
 
 	public static void main(String[] args) {
 
@@ -50,7 +54,11 @@ public class FileSharing {
 		}
 		
 		//endregion
+		
+		
 
+//		SQLiteInterface sql = new SQLiteInterface(new File("database.db"));
+		
 		MySQLInterface sql = new MySQLInterface(
 				config.getProperty("sql.host"), 
 				Integer.parseInt(config.getProperty("sql.port")), 
@@ -62,9 +70,8 @@ public class FileSharing {
 		
 		sql.setLogger(logger).asyncDataSettings(1).connect();
 		
-		sql.execute(""
-				+ ""
-				+ "CREATE TABLE IF NOT EXISTS `files` ("
+		sql.execute(
+				  "CREATE TABLE IF NOT EXISTS `files` ("
 				+ "`szKey` VARCHAR(8) NOT NULL,"
 				+ "`szFilename` VARCHAR(256) NOT NULL,"
 				+ "`szContentType` VARCHAR(200) NOT NULL,"
@@ -73,7 +80,6 @@ public class FileSharing {
 				+ "`tValid` datetime DEFAULT '9999-12-31 23:59:59',"
 				+ "PRIMARY KEY (`szKey`)"
 				+ ");"
-				+ ""
 				);
 		
 		String storageMode = config.getProperty("datastorage.mode");
@@ -83,7 +89,12 @@ public class FileSharing {
 			fileManager = new FileManagerSingle(sql, new File(config.getProperty("datastorage.single.location")));
 		} else throw new IllegalStateException("Invalid storagemode: " + storageMode);
 		
-		new HTTPserver(80);
+		new HTTPserver(Integer.parseInt(config.getProperty("web.port")));
+//		new HTTPSserver(
+//				Integer.parseInt(config.getProperty("web.port")), 
+//				"./keystore.jks", 
+//				"123456"
+//				);
 	}
 	
 	private static void createNewConfigFile(File configFile) throws IOException {
@@ -109,6 +120,10 @@ public class FileSharing {
 	
 	public static Logger getLogger() {
 		return logger;
+	}
+	
+	public static Properties getConfig() {
+		return config;
 	}
 	
 }
