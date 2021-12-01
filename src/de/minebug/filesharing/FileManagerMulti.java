@@ -89,6 +89,10 @@ public class FileManagerMulti implements FileInterface {
 		}
 	}
 	
+	public BufferedInputStream getFile(String key) throws IOException {
+		return new BufferedInputStream(new FileInputStream(new File(baseDir, key)));
+	}
+	
 	public String addFile(BufferedInputStream is, String filename, String contentType, Timestamp timestamp, long contentLength) throws IOException {
 		System.out.println("filename: " + filename + "; ContentType: " + contentType);
 		if (is == null || filename == null || filename.length() == 0)
@@ -110,7 +114,7 @@ public class FileManagerMulti implements FileInterface {
 			int l = is.read(buffer, 0, maxLen);
 			fos.write(buffer, 0, l);
 			contentLength -= l;
-			System.out.println("write: " + offset + " - " + (offset + l) + ", max: " + maxExcpectedLen);
+//			System.out.println("write: " + offset + " - " + (offset + l) + ", max: " + maxExcpectedLen);
 			offset+=l;
 		}
 		

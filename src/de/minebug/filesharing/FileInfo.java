@@ -18,7 +18,7 @@ public class FileInfo {
 		this.available = available;
 	}
 	
-	public String getFileName() {
+	public String getKey() {
 		return filename;
 	}
 	

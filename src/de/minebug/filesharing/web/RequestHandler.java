@@ -1,11 +1,12 @@
 package de.minebug.filesharing.web;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,8 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 import de.minebug.filesharing.FileInfo;
 import de.minebug.filesharing.FileSharing;
+import de.minebug.filesharing.util.AutoScaleDriver_v2;
+import de.minebug.filesharing.util.Render2DEngine_NoGL;
 
 public class RequestHandler {
 
@@ -59,9 +62,31 @@ public class RequestHandler {
 							"$host$", hostname);
 				} else {
 					try {
-						String downloadAddress = hostname+"/download/" + info.getFileName() + "/" + info.getName();
+						String downloadAddress = hostname+"/download/" + info.getKey() + "/" + info.getName();
 						
 						BufferedImage image = generateQRCodeImage(downloadAddress);
+						
+						
+						/*
+						Render2DEngine_NoGL icon = new Render2DEngine_NoGL((BufferedImage)ImageIO.read(
+								//new SefsInputStream(MainController.getDrive(file.getDrive()), file.getPath()))
+//								FileSharing.getFileManager().getFile(info.getKey())
+								new File("./images/logo.png")
+						));
+						Render2DEngine_NoGL out = new Render2DEngine_NoGL(image.getWidth() / 6, image.getWidth() / 6);
+						//out.setEnableAlphaSupport(false);
+						AutoScaleDriver_v2 asd = new AutoScaleDriver_v2(icon);
+						asd.onResize(out.getWidth(), out.getHeight());
+						asd.onRender(out);
+						
+						Render2DEngine_NoGL renderBuffer = new Render2DEngine_NoGL(image);
+						renderBuffer.drawImage(out, (image.getWidth() / 2) - (out.getWidth() / 2), (image.getHeight() / 2) - (out.getHeight() / 2));
+						image = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+						image.setRGB(0, 0, image.getWidth(), image.getHeight(), renderBuffer.getRaw(), 0, renderBuffer.getWidth());
+						//image.setRGB(0, 0, out.getWidth(), out.getHeight(), out.getRaw(), 0, out.getWidth());
+						*/
+						
+						
 						ByteArrayOutputStream ios = new ByteArrayOutputStream();
 						ImageIO.write(image, "png", ios);
 						byte[] imageBytes = ios.toByteArray();
@@ -69,7 +94,7 @@ public class RequestHandler {
 						
 
 						writeFile("html/download.html", "text/html", os, 
-								"$key$", info.getFileName(),
+								"$key$", info.getKey(),
 								"$qrcode$", ("<img class=\"qrCode\" alt=\"\" src=\"data:image/png;base64, " + new String(encoded) + "\" />"),
 								"$name$", info.getName(),
 								"$host$", hostname,
@@ -273,7 +298,7 @@ public class RequestHandler {
 	public static BufferedImage generateQRCodeImage(String barcodeText) throws Exception {
 	    QRCodeWriter barcodeWriter = new QRCodeWriter();
 	    BitMatrix bitMatrix = 
-	      barcodeWriter.encode(barcodeText, BarcodeFormat.QR_CODE, 200, 200);
+	      barcodeWriter.encode(barcodeText, BarcodeFormat.QR_CODE, 400, 400);
 	    
 	    return MatrixToImageWriter.toBufferedImage(bitMatrix);
 	}

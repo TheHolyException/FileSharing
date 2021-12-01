@@ -31,11 +31,13 @@
 		<div class="uiElement3"></div>
 		<div class="logo"><a href="$host$" class="fill-div"></a></div>
 		<div class="LogoText">Minebug File Transfer</div>
-		<div class="divUpload">
-			<form method='post' id="form" action='' enctype='multipart/form-data'>
-				<input class="fileUploadField" type='file' id="fileUploadField" multiple='' required='' name='files' onchange="javascript:document.getElementById('form').submit();"></input>
-			</form>
-			<button class="btnUpload" id="fileUpload"><i class="fa fa-upload"></i> Upload</button>
-		</div>
+			<div class="drop-zone">
+				<form method='post' id="form" action='' enctype='multipart/form-data'>
+					<input class="drop-zone__input" type='file' id="fileUploadField" multiple='' required='' name='files' onchange="javascript:document.getElementById('form').submit();"></input>
+					<button class="btnUpload" id="fileUpload"><i class="fa fa-upload"></i> Upload</button>
+				
+				</form>
+			</div>
+		<script src="scripts/dropFileUploader"></script>
 	</body>
 </html>
