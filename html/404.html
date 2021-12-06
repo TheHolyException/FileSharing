@@ -5,16 +5,7 @@
 		<script src="scripts/background"></script>
 		<script type="text/javascript">
 			window.onload = function() {
-			  Particles.init({
-			    selector: '.background',
-			    maxParticles: 50,
-			    sizeVariations: 2,
-			    speed: 1,
-// 			    color: ["#FF0000", "#00FF00", "#0000FF"],
- 			    color: ["#ff201c", "#ff603c"],
- 			   	minDistance: 200,
-			    connectParticles: true,
-			  });
+				  launchAnimation(document.getElementsByClassName("background")[0]);
 			};
 		</script>
 	</head>
