@@ -1,9 +1,11 @@
-package de.minebug.filesharing;
+package de.minebug.filesharing.filemanagers;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
+
+import de.minebug.filesharing.util.FileInfo;
 
 public interface FileInterface {
 	

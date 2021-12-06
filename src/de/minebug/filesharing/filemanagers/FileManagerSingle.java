@@ -1,4 +1,4 @@
-package de.minebug.filesharing;
+package de.minebug.filesharing.filemanagers;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -10,10 +10,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
+import de.minebug.filesharing.FileSharing;
 import de.minebug.filesharing.data.RandomAcessStorageFile;
 import de.minebug.filesharing.data.RandomAcessStorage_MFT;
+import de.minebug.filesharing.util.FileInfo;
 import de.theholyexception.holyapi.datastorage.dataconnection.DataBaseInterface;
+import de.theholyexception.holyapi.util.exceptions.NotImplementedException;
 
 public class FileManagerSingle implements FileInterface {
 
@@ -23,24 +27,24 @@ public class FileManagerSingle implements FileInterface {
 	public FileManagerSingle(DataBaseInterface dataBaseInterface, File datafile) {
 		this.dataBaseInterface = dataBaseInterface;
 		try {
+			System.out.println(System.getProperty("java.version"));
+			System.out.println("kurwa1");
 			mft = new RandomAcessStorage_MFT(new RandomAcessStorageFile(datafile));
-			System.out.println("aaaaa");
-			Thread t = new Thread(new Runnable() {			
-				@Override
-				public void run() {
-					try {
-						checkFileSystem();
-						while(true) {
-							update();
-							try {
-								Thread.sleep(60000); 
-							} catch (Exception ex) {
-								ex.printStackTrace();
-							}
+			FileSharing.getLogger().log(Level.INFO, mft.listFiles().toString());
+			System.out.println("kurwa2");
+			Thread t = new Thread(() -> {
+				try {
+					checkFileSystem();
+					while(true) {
+						update();
+						try {
+							Thread.sleep(60000); 
+						} catch (InterruptedException ex) {
+							ex.printStackTrace();
 						}
-					} catch (IOException ex) {
-						ex.printStackTrace();
 					}
+				} catch (IOException ex) {
+					ex.printStackTrace();
 				}
 			});
 			t.setName("FileManager Background Tasks");
@@ -57,9 +61,12 @@ public class FileManagerSingle implements FileInterface {
 					+ "SELECT szKey, szContentType, szFilename, tValid FROM files "
 					+ "WHERE tValid > CURRENT_TIMESTAMP() AND szKey=?;", key);
 			result.first();
+			long size = mft.getFileSize(key);
+			if (size == -1) return null;
+			
 			return new FileInfo(
 					key,
-					mft.getFileSize(key),
+					size,
 					result.getString("szFilename"),
 					result.getString("szContentType"), 
 					result.getTimestamp("tValid"));	
@@ -85,11 +92,22 @@ public class FileManagerSingle implements FileInterface {
 		}
 	}
 	
-	public String addFile(BufferedInputStream is, String filename, byte[] token, String contentType, Timestamp timestamp, long contentLength) throws IOException {
-		if (is == null || filename == null || token == null || contentType == null || filename.length() == 0 || token.length == 0)
-			throw new IllegalStateException("Invalid Arguments is: " + is + " filename: " + filename + " token: " + token + " contentType: " + contentType);
+	public BufferedInputStream getFile(String key) throws IOException {
+		throw new NotImplementedException("Feature not Implemented");
+	}
+	
+	public String addFile(BufferedInputStream is, String filename, String contentType, Timestamp timestamp, long contentLength) throws IOException {
+		if (FileSharing.isDebugEnabled())
+			FileSharing.getLogger().log(Level.INFO, "[DEBUG] addFile() filename: " + filename + "; ContentType: " + contentType);
+		if (is == null || filename == null || contentType == null || filename.length() == 0)
+			throw new IllegalStateException("Invalid Arguments is: " + is + " filename: " + filename + " contentType: " + contentType);
 		
 		String key = UUID.randomUUID().toString().substring(0, 8);
+		
+		while (getFileInfo(key) != null) {
+			key = UUID.randomUUID().toString().substring(0, 8);
+		}
+		
 		
 		synchronized (mft) {
 			mft.createFile(key, contentLength);
@@ -105,14 +123,14 @@ public class FileManagerSingle implements FileInterface {
 				mft.writeFile(key, offset, buffer, 0, l);
 			}
 			contentLength -= l;
-			System.out.println("write: " + offset + " - " + (offset + l) + ", max: " + maxExcpectedLen);
+			if (FileSharing.isDebugEnabled())
+				FileSharing.getLogger().log(Level.INFO, "[DEBUG] write: " + offset + " - " + (offset + l) + ", max: " + maxExcpectedLen);
 			offset+=l;
 		}
 
 		if (timestamp == null) {
 			dataBaseInterface.executeSafeAsync("INSERT INTO files (`szKey`, `szFilename`, szContentType, nContentLength) VALUES (?, ?, ?, ?)", key, filename, contentType, String.valueOf(contentLength));
 		} else {
-			System.out.println("TIMESTAMP: " + timestamp);
 			dataBaseInterface.executeSafeAsync("INSERT INTO files (`szKey`, `szFilename`, szContentType, nContentLength, `tValid`) VALUES (?, ?, ?, ?, ?)", key, filename, contentType, String.valueOf(contentLength), timestamp.toString());
 		}
 		

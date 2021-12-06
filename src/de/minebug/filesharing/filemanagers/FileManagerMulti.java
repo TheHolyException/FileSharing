@@ -1,4 +1,4 @@
-package de.minebug.filesharing;
+package de.minebug.filesharing.filemanagers;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import de.minebug.filesharing.FileSharing;
+import de.minebug.filesharing.util.FileInfo;
 import de.theholyexception.holyapi.datastorage.dataconnection.DataBaseInterface;
 
 public class FileManagerMulti implements FileInterface {
@@ -94,7 +96,8 @@ public class FileManagerMulti implements FileInterface {
 	}
 	
 	public String addFile(BufferedInputStream is, String filename, String contentType, Timestamp timestamp, long contentLength) throws IOException {
-		System.out.println("filename: " + filename + "; ContentType: " + contentType);
+		if (FileSharing.isDebugEnabled())
+			FileSharing.getLogger().log(Level.INFO, "[DEBUG] addFile() filename: " + filename + "; ContentType: " + contentType);
 		if (is == null || filename == null || filename.length() == 0)
 			throw new IllegalStateException("Invalid Arguments is: " + is + " filename: " + filename + " contentType: " + contentType);
 		
@@ -103,19 +106,19 @@ public class FileManagerMulti implements FileInterface {
 		
 		File file = new File(baseDir, key);
 		FileOutputStream fos = new FileOutputStream(file);
-		System.out.println(file.getAbsolutePath());
 
-		long maxExcpectedLen = contentLength;
-		long offset = 0;
+//		long maxExcpectedLen = contentLength;
+//		long offset = 0;
+		long length = new Long(contentLength);
 		byte[] buffer = new byte[1024*1024];
-		while(contentLength > 0) {
+		while(length > 0) {
 			int maxLen = buffer.length;
-			if(contentLength < maxLen) maxLen = (int)contentLength;
+			if(length < maxLen) maxLen = (int)length;
 			int l = is.read(buffer, 0, maxLen);
 			fos.write(buffer, 0, l);
-			contentLength -= l;
+			length -= l;
 //			System.out.println("write: " + offset + " - " + (offset + l) + ", max: " + maxExcpectedLen);
-			offset+=l;
+//			offset+=l;
 		}
 		
 		fos.flush();
@@ -124,7 +127,6 @@ public class FileManagerMulti implements FileInterface {
 		if (timestamp == null) {
 			dataBaseInterface.executeSafeAsync("INSERT INTO files (`szKey`, `szFilename`, szContentType, nContentLength) VALUES (?, ?, ?, ?)", key, filename, contentType, String.valueOf(contentLength));
 		} else {
-			System.out.println("TIMESTAMP: " + timestamp);
 			dataBaseInterface.executeSafeAsync("INSERT INTO files (`szKey`, `szFilename`, szContentType, nContentLength, `tValid`) VALUES (?, ?, ?, ?, ?)", key, filename, contentType, String.valueOf(contentLength), timestamp.toString());
 		}
 		
@@ -139,7 +141,7 @@ public class FileManagerMulti implements FileInterface {
 						String key = result.getString("szKey");
 						Files.delete(new File(baseDir, key).toPath());
 						System.out.println("File went Invalid: " + key);
-						FileSharing.getLogger().log(Level.INFO, "[Validity Checker] Invalid File Found: " + key);
+						FileSharing.getLogger().log(Level.INFO, "[Validity Checker] Invalid File Found: " + result.getString("szFilename") + "("+key+")");
 						dataBaseInterface.executeSafe("DELETE FROM files WHERE `szKey`=?", key);
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -148,7 +150,7 @@ public class FileManagerMulti implements FileInterface {
 			} catch (SQLException ex) {
 				ex.printStackTrace();
 			}
-		}, "SELECT szKey, tValid FROM files WHERE tValid < CURRENT_TIMESTAMP();");
+		}, "SELECT szKey, szFilename, tValid FROM files WHERE tValid < CURRENT_TIMESTAMP();");
 	}
 	
 	public void checkFileSystem() throws IOException {
