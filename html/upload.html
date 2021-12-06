@@ -7,20 +7,10 @@
 		<script src="scripts/background"></script>
 		<script type="text/javascript">
 			window.onload = function() {
+		      launchAnimation(document.getElementsByClassName("background")[0]);
 			  document.getElementById("fileUpload").addEventListener("click", () =>{
 			  	document.getElementById("fileUploadField").click();
-			  });
-			  
-			  Particles.init({
-			    selector: '.background',
-			    maxParticles: 50,
-			    sizeVariations: 5,
-			    speed: 1,
- 			    color: ["#ff201c", "#ff603c"],
- 			    //color: "#ff201c",
- 			   	minDistance: 200,
-			    connectParticles: true,
-			  });
+			  });			  
 			};
 		</script>
 	</head>
@@ -34,8 +24,7 @@
 			<div class="drop-zone">
 				<form method='post' id="form" action='' enctype='multipart/form-data'>
 					<input class="drop-zone__input" type='file' id="fileUploadField" multiple='' required='' name='files' onchange="javascript:document.getElementById('form').submit();"></input>
-					<button class="btnUpload" id="fileUpload"><i class="fa fa-upload"></i> Upload</button>
-				
+					<button class="btnUpload"><i class="fa fa-upload"></i> Upload</button>
 				</form>
 			</div>
 		<script src="scripts/dropFileUploader"></script>

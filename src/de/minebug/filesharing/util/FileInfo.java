@@ -1,4 +1,4 @@
-package de.minebug.filesharing;
+package de.minebug.filesharing.util;
 
 import java.sql.Timestamp;
 

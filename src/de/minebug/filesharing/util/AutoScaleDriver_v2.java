@@ -6,7 +6,6 @@ public class AutoScaleDriver_v2 {
 	private Render2DEngine_NoGL texture1;
 	private int w, h;
 	private double zoom, maxZoom;
-	private boolean renderBlackBorders;
 
 	private int zoomPosX = 0, zoomPosY = 0;
 	
@@ -14,12 +13,7 @@ public class AutoScaleDriver_v2 {
 	public int mode = 1;
 	
 	public AutoScaleDriver_v2(Render2DEngine_NoGL texture) {
-		this(texture, true);
-	}
-	
-	public AutoScaleDriver_v2(Render2DEngine_NoGL texture, boolean renderBlackBorders) {
 		this.texture1 = texture;
-		this.renderBlackBorders = renderBlackBorders;
 	}
 	
 	public void onRender(Render2DEngine_NoGL graphics) {
